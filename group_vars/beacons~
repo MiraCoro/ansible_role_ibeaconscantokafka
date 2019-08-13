@@ -1,6 +1,0 @@
-hostname: blescan-[\d+]
-ansible_ssh_pass=0micr0n3b
-ansible_ssh_user=pi
-isca3_repository_url: https://github.com/MiraCoro/PyBlescan-CpToKafka.git
-wifi_identity: Auto_EPM-LSGR_wifi
-wifi_password: RyG99JW5neKaNFA4FZAN6gPBN
