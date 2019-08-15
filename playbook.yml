@@ -2,51 +2,42 @@
   - hosts: beacons
     gather_facts: yes
     remoute_user: {{user}}
+
     tasks:
       - name: Update
         apt:
           update_cache: yes
-      - name: Check if Python is installed
-        shell: apt show python3
-        register: python3_is_installed
-        failed_when: no
-      - name: Install Python3 if not installed
-        apt: pkg=Python3 state=present
-        when: python3_is_installed == 1
-      - name: Install development libraries for pybluez
-        apt: pkg=libbluetooth-devpip state=present    
-        become: yes
-        become_method: sudo
-      - name: Check if virtualenv is installed #for using pip module on management host
-        shell: apt show virtualenv
-        register: virtualenv_is_installed
-        failed_when: no
-      - name: Install virtualenv if not installed
-        apt: pkg=virtualenv state=present
-        when: virtualenv_is_installed == 1
-      - name: Check if packages are installed via pip #for using pip module on management host
-        shell: pip list | grep {{ item }}
-        with_items:
-          - setuptools
-          - kafka-python
-          - pybluez
-          - mcpi
-          - kazoo
-          - bitstring
-        register: packages_is_installed
-        failed_when: no
 
+        - name: Check if packages are installed #for using pip module on management host
+        shell: apt list --installed | grep {{ item }}
+        with_items:
+          {{ pkgs }}
+        register: installed_pkgs
+        failed_when: no
+        - name: Debug found pkgs
+          debug:
+            msg: {{ installed_pkgs.stdout_lines }}
+        - name: Install absent packages
+        with_items:
+          {{ pkgs }}
+        when: {{ item }} not in installed_pkgs.stdout
+        
+      - name: Check if modules are installed via pip #for using pip module on management host
+        shell: pip3 list | grep {{ item }}
+        with_items:
+          {{ modules }}
+        register: installed_modules
+        failed_when: no
+      - name: Debug found modules
+        debug:
+           msg: {{ installed_modules.stdout_lines }}
+
+      # Install absent modules
       - pip:
-        name: {{ item }}  
-        state: present
-        with items:
-          - setuptools
-          - kafka-python
-          - pybluez
-          - mcpi
-          - kazoo
-          - bitstring
-        when: packages_is_installed == 1
+        name: {{ modules }}  
+        with_items:
+          {{ modules }}
+        when: {{ item }} not in installed_modules.stdout
 
       
       

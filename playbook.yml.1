@@ -1,0 +1,53 @@
+  ---
+  - hosts: beacons
+    gather_facts: yes
+    remoute_user: {{user}}
+    tasks:
+      - name: Update
+        apt:
+          update_cache: yes
+      - name: Check if Python is installed
+        shell: apt show python3
+        register: python3_is_installed
+        failed_when: no
+      - name: Install Python3 if not installed
+        apt: pkg=Python3 state=present
+        when: python3_is_installed == 1
+      - name: Install development libraries for pybluez
+        apt: pkg=libbluetooth-devpip state=present    
+        become: yes
+        become_method: sudo
+      - name: Check if virtualenv is installed #for using pip module on management host
+        shell: apt show virtualenv
+        register: virtualenv_is_installed
+        failed_when: no
+      - name: Install virtualenv if not installed
+        apt: pkg=virtualenv state=present
+        when: virtualenv_is_installed == 1
+      - name: Check if packages are installed via pip #for using pip module on management host
+        shell: pip3 list | grep {{ item }}
+        with_items:
+          - setuptools
+          - kafka-python
+          - pybluez
+          - mcpi
+          - kazoo
+          - bitstring
+        register: package_is_installed
+        failed_when: no
+
+      - pip:
+        name: {{ item }}  
+        state: present
+        with items:
+          - setuptools
+          - kafka-python
+          - pybluez
+          - mcpi
+          - kazoo
+          - bitstring
+        when: package_is_installed == 1
+
+      
+      
+          

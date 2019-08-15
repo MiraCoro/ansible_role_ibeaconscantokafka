@@ -5,3 +5,5 @@ isca3_repository_url: https://github.com/MiraCoro/PyBlescan-CpToKafka.git
 user: pi
 ansible_sudo_user: pi
 ansible_python_interpreter: /usr/bin/python3
+pkgs: ['python3', 'libbluetooth-devpip', 'virtualenv']
+modules: ['setuptools', 'kafka-python', 'pybluez', 'mcpi', 'kazoo', 'bitstring']
