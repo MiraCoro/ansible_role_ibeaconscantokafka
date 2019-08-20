@@ -38,6 +38,20 @@
         with_items:
           {{ modules }}
         when: {{ item }} not in installed_modules.stdout
+        
+     - name: Create directory for iBeacon Scanner
+       file:
+         path: /iscan3
+         state: directory    
+        
+     - git:
+       repo: 'https://github.com/MiraCoro/ansible_role_ibeaconscantokafka.git'
+       dest: /iscan3
+       debug:
+         msg: Repository {{ repo }} was cloned
+         
+     - name:     
+          
 
       
       
