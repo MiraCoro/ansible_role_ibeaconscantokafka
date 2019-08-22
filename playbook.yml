@@ -9,14 +9,16 @@
           update_cache: yes
 
         - name: Check if packages are installed #for using pip module on management host
-        shell: apt list --installed | grep {{ item }}
-        with_items:
+          shell: apt list --installed | grep {{ item }}
+          with_items:
           {{ pkgs }}
         register: installed_pkgs
         failed_when: no
+        
         - name: Debug found pkgs
           debug:
             msg: {{ installed_pkgs.stdout_lines }}
+            
         - name: Install absent packages
         with_items:
           {{ pkgs }}
@@ -38,6 +40,11 @@
         with_items:
           {{ modules }}
         when: {{ item }} not in installed_modules.stdout
+     
+     - name: Check is it a new scanner
+         stat:
+           path: /iscan3
+         register: stat_result
         
      - name: Create directory for iBeacon Scanner
        file:
@@ -45,14 +52,42 @@
          state: directory    
         
      - git:
-       repo: 'https://github.com/MiraCoro/ansible_role_ibeaconscantokafka.git'
+       repo: '{{ repo }}'
        dest: /iscan3
        debug:
          msg: Repository {{ repo }} was cloned
          
-     - name:     
-          
+     - name: Move service file to the proper directory
+       shell: iscan3.service /etc/systemd/system
+       chdir: /iscan3
+       
+     - name: Add logging
+       shell: cat iscan3_log >> /etc/logrotate.d/rsyslog
+       
+     - name: start iscan3 service
+       systemd:
+         state: started
+         name: iscan3
+         enabled: yes
+         daemon_reload: yes
+         
+      - name: Check if iscan 3 is running
+        shell: systemctl status iscan3
+        register: iscan3_status
+        debug:
+          msg: {{ iscan3_status }}
+         
+      - name: Start logging:
+        shell: logrotate /etc/logrotate.d/rsyslog
+        debug:
+          msg: Log created
+         
+    - name: reboot if scanner just configured
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        when: stat_result == False
 
+         
       
       
           

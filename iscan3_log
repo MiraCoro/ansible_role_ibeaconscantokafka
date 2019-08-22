@@ -1,0 +1,16 @@
+
+/var/log/testblescan3.log
+{
+        rotate 4
+        weekly
+        missingok
+        create
+        maxsize 1M
+        notifempty
+        compress
+        delaycompress
+        sharedscripts
+        postrotate
+                invoke-rc.d rsyslog rotate > /dev/null
+        endscript
+}
