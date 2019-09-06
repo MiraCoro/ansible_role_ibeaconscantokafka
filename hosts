@@ -1,4 +1,3 @@
 [beacons]
-blescan-003.petersburg.epam.com
-ansible_user=pi
-ansible_pass=0micr0n3b
+blescan-003.petersburg.epam.com ansible_user=pi ansible_pass=0micr0n3b
+#blescan-001.petersburg.epam.com ansible_user=pi ansible_pass=adaada
