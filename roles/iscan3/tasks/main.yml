@@ -1,42 +1,27 @@
+---
+  #- name: Update
+    #apt:
+      #update_cache: yes
+      #cache_valid_time: 86400
+    #become: yes
+    #become_method: sudo
 
+  - name: Install packages
+    apt: 
+      pkg: "{{ pkgs }}"
+      state: present
 
-  - name: Update
-    apt:
-      update_cache: yes
-
-  - name: Check if packages are installed #for using pip module on management host
-    shell: apt list --installed | grep "{{ item }}"
-    with_items:
-      "{{ pkgs }}"
-    register: installed_pkgs
-    failed_when: no
-        
-  - name: Debug found pkgs
-    debug:
-      msg: "{{ installed_pkgs.stdout_lines }}"
-            
-  - name: Install absent "{{ pkgs }}"
-    apt: pkg="{{ item }}" state=present
-    with_items:
-      "{{ pkgs }}"
-    when: '"{{ item }}" not in installed_pkgs.stdout'
-        
-  - name: Check if modules are installed via pip #for using pip module on management host
-    shell: pip3 list | grep "{{ item }}"
-    with_items:
-      "{{ modules }}"
-    register: installed_modules
-    failed_when: no
-  - name: Debug found modules
-    debug:
-       msg: "{{ installed_modules.stdout_lines }}"
-
-      # Install absent modules
+  # Install absent modules
   - pip:
-    name: "{{ modules }}"  
-    with_items:
-      "{{ modules }}"
-    when: '"{{ item }}" not in installed_modules.stdout'
+      name:
+        - setuptools
+        - evdev
+        - kafka-python
+        - pybluez
+        - mcpi
+        - kazoo
+        #- bitstring
+      state: latest
      
   - name: Check is it a new scanner
     stat:
@@ -49,18 +34,23 @@
       state: directory    
         
   - git:
-    repo: "{{ repo }}"
-    dest: /iscan3
+      repo: "{{ iscan3_repository_url }}"
+      dest: /iscan3
+      force: yes
+
   - name: Debug fetch  
     debug:
-      msg: Repository  was cloned
-         
+      msg: "Repository  was cloned"
+      
   - name: Move service file to the proper directory
-    shell: iscan3.service /etc/systemd/system
-    chdir: /iscan3
+    shell: mv iscan3.service /etc/systemd/system
+    args:
+      chdir: /iscan3/
        
   - name: Add logging
-    shell: cat iscan3_log >> /etc/logrotate.d/rsyslog
+    shell: cat iscan3.log >> /etc/logrotate.d/rsyslog
+    args:
+      chdir: /iscan3/
      
   - name: start iscan3 service
     systemd:
@@ -72,20 +62,21 @@
   - name: Check if iscan 3 is running
     shell: systemctl status iscan3
     register: iscan3_status
+    
+  - name: Print service state  
     debug:
       msg: "{{ iscan3_status }}"
          
   - name: Start logging
     shell: logrotate /etc/logrotate.d/rsyslog
+    
+  - name: Check log   
     debug:
-      msg: Log created
-         
-  - name: reboot if scanner just configured
-    reboot:
-     msg: "Reboot initiated by Ansible"
-     when: stat_result == False
+      msg: "Log created"
 
-         
-      
-      
-          
+#- name: reboot if scanner just configured
+#  reboot:
+#   msg: "Reboot initiated by Ansible"
+#   when: dir_iscan3.exists == false
+
+        

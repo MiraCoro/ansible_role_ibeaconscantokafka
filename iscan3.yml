@@ -1,5 +1,9 @@
 ---
   - hosts: beacons
-    tasks:
-    - include_role:
-        name: iscan3
+    become: yes
+    become_user: root
+    roles:
+      - role: iscan3
+        #become: yes
+        #become_method: sudo
+        

@@ -1,11 +1,11 @@
 ---
   #hostname: blescan-[\d+]
-  ansible_ssh_pass: 0micr0n3b
-  ansible_ssh_user: pi
+  #ansible_ssh_pass: 0micr0n3b
+  #ansible_ssh_user: pi
   isca3_repository_url: https://github.com/MiraCoro/PyBlescan-CpToKafka.git
-  user: pi
-  ansible_sudo_user: pi
+  #user: pi
+  #ansible_sudo_user: pi
   ansible_python_interpreter: /usr/bin/python3
-  pkgs: ['python3', 'libbluetooth-devpip', 'virtualenv']
+  pkgs: ['python3', 'libbluetooth-dev', 'virtualenv']
   modules: ['setuptools', 'kafka-python', 'pybluez', 'mcpi', 'kazoo', 'bitstring']
   repo: 'https://github.com/MiraCoro/ansible_role_ibeaconscantokafka.git'
